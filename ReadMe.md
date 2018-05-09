@@ -66,8 +66,17 @@ The script is placed in repository (bench_marks.py):
 
 |Name of library|Results|
 |---------------|-------|
-|json           |1.4962455610000003s|
-|ujson          |0.886725631s|
-|dataclasses-ujson    |7.90555929s|
-|dataclasses-json    |20.340407406s|
+|json           |1.4237859140000007s|
+|ujson          |0.8745695059999998s|
+|dataclasses-ujson    |3.316673846s|
+|dataclasses-json    |20.831920666000002s|
+
+if generator will be returned (using flag many=true)
+
+|Name of library|Results|
+|---------------|-------|
+|json           |1.4263252840000007s|
+|ujson          |0.8816592850000013s|
+|dataclasses-ujson    |1.0314886600000008s|
+|dataclasses-json    |-|
 

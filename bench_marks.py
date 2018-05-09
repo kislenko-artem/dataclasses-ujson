@@ -30,6 +30,8 @@ DICT_JSON = """
     "favoriteFruit": "apple"
   }
 """
+LIST_JSON = "[{}]".format(DICT_JSON)
+
 
 @dataclass(frozen=True)
 class DictUJson(UJsonMixin):
@@ -81,33 +83,41 @@ class DictJson(DataClassJsonMixin):
 if __name__ == "__main__":
     count = 100000
 
-    perf_counter = {
-        "json": 0,
-        "ujson": 0,
-        "udata_class": 0,
-        "data_class": 0,
-    }
+    def measure(json_string, many=False):
+        perf_counter = {
+            "json": 0,
+            "ujson": 0,
+            "udata_class": 0,
+            "data_class": 0,
+        }
 
-    t = time.process_time()
-    for i in range(count):
-        DictUJson.loads(DICT_JSON)
-    perf_counter["udata_class"] = time.process_time() - t
+        t = time.process_time()
+        for i in range(count):
+            DictUJson.loads(json_string, many=many)
+        perf_counter["udata_class"] = time.process_time() - t
 
-    t = time.process_time()
-    for i in range(count):
-        ujson.loads(DICT_JSON)
-    perf_counter["ujson"] = time.process_time() - t
+        t = time.process_time()
+        for i in range(count):
+            ujson.loads(json_string)
+        perf_counter["ujson"] = time.process_time() - t
 
-    t = time.process_time()
-    for i in range(count):
-        json.loads(DICT_JSON)
-    perf_counter["json"] = time.process_time() - t
+        t = time.process_time()
+        for i in range(count):
+            json.loads(json_string)
+        perf_counter["json"] = time.process_time() - t
 
-    t = time.process_time()
-    for i in range(count):
-        DictJson.from_json(DICT_JSON)
-    perf_counter["data_class"] = time.process_time() - t
+        try:
+            t = time.process_time()
+            for i in range(count):
+                DictJson.from_json(json_string)
+            perf_counter["data_class"] = time.process_time() - t
+        except TypeError:
+            perf_counter["data_class"] = "-"
 
 
-    for key in perf_counter:
-        print("{}: {}s".format(key, perf_counter[key]))
+        for key in perf_counter:
+            print("{}: {}s".format(key, perf_counter[key]))
+
+
+    measure(DICT_JSON)
+    measure(LIST_JSON, many=True)

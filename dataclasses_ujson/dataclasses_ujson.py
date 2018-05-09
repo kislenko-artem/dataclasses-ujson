@@ -33,11 +33,13 @@ class UJsonMixin:
             _kwargs = {}
         for field in fields(cls):
             field_value = data[field.name]
-            if is_dataclass(field.type):
-                _kwargs[field.name] = UJsonMixin._loads(field.type, field_value)
+            if field.type in [str, float, int, bool]:
+                _kwargs[field.name] = field_value
             elif UJsonMixin._is_collection(field.type):
                 _kwargs[field.name] = UJsonMixin._decode_collection(field.type,
                                                                     field_value)
+            elif is_dataclass(field.type):
+                _kwargs[field.name] = UJsonMixin._loads(field.type, field_value)
             else:
                 _kwargs[field.name] = field_value
         return cls(**_kwargs)
