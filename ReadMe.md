@@ -68,6 +68,6 @@ The script is placed in repository (bench_marks.py):
 |---------------|-------|
 |json           |1.4962455610000003s|
 |ujson          |0.886725631s|
-|udata_class    |7.90555929s|
-|data_class     |20.340407406s|
+|dataclasses-ujson    |7.90555929s|
+|dataclasses-json    |20.340407406s|
 
