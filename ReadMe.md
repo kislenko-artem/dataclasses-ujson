@@ -2,6 +2,7 @@
 
 The library provides a simple API for decoding JSON to dataclasses.
 You can use nested dataclasses. The library uses `ujson` for better performance.
+You need install [dataclasses](https://github.com/ericvsmith/dataclasses) for python3.6
 
 ### Examples
 

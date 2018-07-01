@@ -1,4 +1,4 @@
-from typing import Collection, GenericMeta, Generator, List, Union
+from typing import Any, Generator, List, Union
 
 import ujson as json
 from dataclasses import is_dataclass, fields, dataclass
@@ -50,17 +50,17 @@ class UJsonMixin:
             yield UJsonMixin._loads(cls, d)
 
     @staticmethod
-    def _is_collection(obj_type: GenericMeta) -> bool:
+    def _is_collection(obj_type: Any) -> bool:
         if obj_type == str:
             return False
         try:
-            return issubclass(obj_type, Collection)
+            return obj_type == list or obj_type == dict
         except AttributeError:
             pass
         return False
 
     @staticmethod
-    def _decode_collection(obj_type: GenericMeta, value):
+    def _decode_collection(obj_type: Any, value):
         if not value:
             return value
         try:

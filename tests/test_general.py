@@ -66,8 +66,8 @@ class TestLoadsMany:
         d2 = JsonListNested(a=JsonSimple(x=1), b=[JsonList(x=[1])],
                             c=[JsonNoTypingDict(x={"d": 1})])
         assert d1.a == d2.a
-        assert list(d1.b) == d2.b
-        assert list(d1.c) == d2.c
+        assert list(d1.b)[0]["x"] == d2.b[0].x
+        assert list(d1.c)[0]["x"] == d2.c[0].x
 
 
 class TestDumps:
