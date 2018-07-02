@@ -1,8 +1,9 @@
 from tests import (JsonList, JsonSimple, JsonDict, JsonNoTypingList,
                    JsonNoTypingDict, JsonNested, JsonUnion, JsonListNested,
+                   JsonSimpleOptional,
                    JSON_SIMPLE, JSON_LIST, JSON_DICT, JSON_NESTED,
                    JSON_UNION_V1, JSON_UNION_V2, JSON_SIMPLE_LIST,
-                   JSON_NESTED_LIST)
+                   JSON_NESTED_LIST, JSON_SIMPLE_OPTIONAL)
 
 
 class TestLoadsDict:
@@ -70,5 +71,8 @@ class TestLoadsMany:
         assert list(d1.c)[0]["x"] == d2.c[0].x
 
 
-class TestDumps:
-    pass
+class TestOptional:
+    def test_simple(self):
+        x1 = JsonSimpleOptional.loads(JSON_SIMPLE_OPTIONAL)
+        x2 = JsonSimpleOptional(x=1, y=None)
+        assert x1.y == x2.y

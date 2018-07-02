@@ -33,7 +33,8 @@ class UJsonMixin:
             _kwargs = {}
         for field in fields(cls):
             field_value = data[field.name]
-            if field.type in [str, float, int, bool]:
+            if (field.type is str or field.type is float or field.type is int
+                    or field.type is bool):
                 _kwargs[field.name] = field_value
             elif UJsonMixin._is_collection(field.type):
                 _kwargs[field.name] = UJsonMixin._decode_collection(field.type,
@@ -51,10 +52,10 @@ class UJsonMixin:
 
     @staticmethod
     def _is_collection(obj_type: Any) -> bool:
-        if obj_type == str:
+        if obj_type is type(""):
             return False
         try:
-            return obj_type == list or obj_type == dict
+            return obj_type is list or obj_type is dict
         except AttributeError:
             pass
         return False
@@ -71,9 +72,9 @@ class UJsonMixin:
             return value
         type_value = type(value)
 
-        if is_dataclass(type_arg) and type_value != list:
+        if is_dataclass(type_arg) and type_value is not list:
             return UJsonMixin._loads(type_arg, value)
-        if is_dataclass(type_arg) and type_value == list:
+        if is_dataclass(type_arg) and type_value is list:
             return UJsonMixin._loads_many(type_arg, value)
         else:
             return value

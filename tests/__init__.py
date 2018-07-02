@@ -1,9 +1,10 @@
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Optional
 
 from dataclasses import dataclass
 from dataclasses_ujson.dataclasses_ujson import UJsonMixin
 
 JSON_SIMPLE = '{"x": 1}'
+JSON_SIMPLE_OPTIONAL = '{"x": 1, "y": null}'
 JSON_LIST = '{"x": [1]}'
 JSON_DICT = '{"x": {"d": 1}}'
 JSON_NESTED = '{{"a": {simple}, "b": {list}, "c": {dict}}}'.format(
@@ -60,3 +61,8 @@ class JsonListNested(UJsonMixin):
     a: JsonSimple
     b: List[JsonList]
     c: List[JsonNoTypingDict]
+
+@dataclass(frozen=True)
+class JsonSimpleOptional(UJsonMixin):
+    x: int
+    y: Optional[int]
