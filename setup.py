@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="dataclasses_ujson",
-    version="0.0.2",
+    version="0.0.3",
     packages=find_packages(exclude=("tests*","bench_marks.py")),
     author="Kislenko Artem ",
     author_email="artem@webart-tech.ru",

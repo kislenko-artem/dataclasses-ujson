@@ -1,3 +1,10 @@
+import sys
+NEW_TYPING = sys.version_info[:3] >= (3, 7, 0)  # PEP 560
+if NEW_TYPING:
+    import collections.abc
+    from typing import _GenericAlias as GenericMeta
+else:
+    from typing import GenericMeta
 from typing import Any, Generator, List, Union
 
 import ujson as json
@@ -32,7 +39,10 @@ class UJsonMixin:
         if _kwargs is None:
             _kwargs = {}
         for field in fields(cls):
-            field_value = data[field.name]
+            field_value = data.get(field.name)
+            if field_value is None:
+                _kwargs[field.name] = None
+                continue
             if (field.type is str or field.type is float or field.type is int
                     or field.type is bool):
                 _kwargs[field.name] = field_value
@@ -52,13 +62,17 @@ class UJsonMixin:
 
     @staticmethod
     def _is_collection(obj_type: Any) -> bool:
+        simple_type = False
         if obj_type is type(""):
             return False
         try:
-            return obj_type is list or obj_type is dict
+            simple_type = obj_type is list or obj_type is dict
         except AttributeError:
             pass
-        return False
+        if simple_type:
+            return True
+        else:
+            return type(obj_type) is GenericMeta
 
     @staticmethod
     def _decode_collection(obj_type: Any, value):
