@@ -71,17 +71,17 @@ The script is placed in repository (bench_marks.py):
 
 |Name of library|Results|
 |---------------|-------|
-|json           |1.4s|
-|ujson          |1.0s|
-|dataclasses-ujson    |3.0s (python3.7), 3.2s  (python3.6)`|
-|dataclasses-json    |20.8s|
+|json           |0.62s|
+|ujson          |0.53s|
+|dataclasses-ujson    |1.24s (python3.10)`|
+|dataclasses-json    |21.6s|
 
 if generator will be returned (using flag many=true)
 
 |Name of library|Results|
 |---------------|-------|
-|json           |1.4s|
-|ujson          |1.0s|
-|dataclasses-ujson    |1.0s|
+|json           |0.62s|
+|ujson          |0.54s|
+|dataclasses-ujson    |0.59s|
 |dataclasses-json    |-|
 

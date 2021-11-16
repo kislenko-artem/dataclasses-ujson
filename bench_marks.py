@@ -112,8 +112,9 @@ if __name__ == "__main__":
                 DictJson.from_json(json_string)
             perf_counter["data_class"] = time.process_time() - t
         except TypeError:
-            perf_counter["data_class"] = "-"
-
+            perf_counter["data_class"] = "None"
+        except AttributeError:
+            perf_counter["data_class"] = "None"
 
         for key in perf_counter:
             print("{}: {}s".format(key, perf_counter[key]))

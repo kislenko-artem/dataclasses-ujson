@@ -1,13 +1,14 @@
 import sys
+
 NEW_TYPING = sys.version_info[:3] >= (3, 7, 0)  # PEP 560
 if NEW_TYPING:
-    import collections.abc
     from typing import _GenericAlias as GenericMeta
 else:
     from typing import GenericMeta
 from typing import Any, Generator, List, Union
 
 import ujson as json
+
 from dataclasses import is_dataclass, fields, dataclass
 
 DC = dataclass
@@ -17,7 +18,7 @@ DC_GENERATOR = Generator[List[DC], List[DC], None]
 class UJsonMixin:
 
     @classmethod
-    def loads(cls: DC, json_string: str, many: bool=False,
+    def loads(cls: DC, json_string: str, many: bool = False,
               **kwargs) -> Union[DC, DC_GENERATOR]:
         """
 
@@ -38,21 +39,24 @@ class UJsonMixin:
     def _loads(cls: DC, data: dict, _kwargs: dict = None) -> DC:
         if _kwargs is None:
             _kwargs = {}
-        for field in fields(cls):
-            field_value = data.get(field.name)
-            if field_value is None:
-                _kwargs[field.name] = None
-                continue
-            if (field.type is str or field.type is float or field.type is int
-                    or field.type is bool):
-                _kwargs[field.name] = field_value
-            elif UJsonMixin._is_collection(field.type):
-                _kwargs[field.name] = UJsonMixin._decode_collection(field.type,
-                                                                    field_value)
-            elif is_dataclass(field.type):
-                _kwargs[field.name] = UJsonMixin._loads(field.type, field_value)
-            else:
-                _kwargs[field.name] = field_value
+        try:
+            for field in getattr(cls, '__dataclass_fields__').values():
+                field_value = data.get(field.name)
+                if field_value is None:
+                    _kwargs[field.name] = None
+                    continue
+                if (field.type is str or field.type is float or field.type is int
+                        or field.type is bool):
+                    _kwargs[field.name] = field_value
+                elif UJsonMixin._is_collection(field.type):
+                    _kwargs[field.name] = UJsonMixin._decode_collection(field.type,
+                                                                        field_value)
+                elif is_dataclass(field.type):
+                    _kwargs[field.name] = UJsonMixin._loads(field.type, field_value)
+                else:
+                    _kwargs[field.name] = field_value
+        except AttributeError:
+            raise TypeError('must be called with a dataclass type or instance')
         return cls(**_kwargs)
 
     @staticmethod
