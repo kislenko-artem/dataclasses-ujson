@@ -1,15 +1,14 @@
+from dataclasses import is_dataclass, dataclass
 import sys
+from typing import Any, Generator, List, Union
 
 NEW_TYPING = sys.version_info[:3] >= (3, 7, 0)  # PEP 560
 if NEW_TYPING:
     from typing import _GenericAlias as GenericMeta
 else:
     from typing import GenericMeta
-from typing import Any, Generator, List, Union
 
 import ujson as json
-
-from dataclasses import is_dataclass, fields, dataclass
 
 DC = dataclass
 DC_GENERATOR = Generator[List[DC], List[DC], None]
@@ -29,14 +28,14 @@ class UJsonMixin:
         """
         data = json.loads(json_string, **kwargs)
         if many:
-            return UJsonMixin._loads_many(cls, data)
-        return UJsonMixin._loads(cls, data)
+            return UJsonMixin.from_dict_many(cls, data)
+        return UJsonMixin.from_dict(cls, data)
 
     def dumps(self):
         raise NotImplemented()
 
     @staticmethod
-    def _loads(cls: DC, data: dict, _kwargs: dict = None) -> DC:
+    def from_dict(cls: DC, data: dict, _kwargs: dict = None) -> DC:
         if _kwargs is None:
             _kwargs = {}
         try:
@@ -52,7 +51,7 @@ class UJsonMixin:
                     _kwargs[field.name] = UJsonMixin._decode_collection(field.type,
                                                                         field_value)
                 elif is_dataclass(field.type):
-                    _kwargs[field.name] = UJsonMixin._loads(field.type, field_value)
+                    _kwargs[field.name] = UJsonMixin.from_dict(field.type, field_value)
                 else:
                     _kwargs[field.name] = field_value
         except AttributeError:
@@ -60,14 +59,14 @@ class UJsonMixin:
         return cls(**_kwargs)
 
     @staticmethod
-    def _loads_many(cls: DC, data: list) -> DC_GENERATOR:
+    def from_dict_many(cls: DC, data: list) -> DC_GENERATOR:
         for d in data:
-            yield UJsonMixin._loads(cls, d)
+            yield UJsonMixin.from_dict(cls, d)
 
     @staticmethod
     def _is_collection(obj_type: Any) -> bool:
         simple_type = False
-        if obj_type is type(""):
+        if isinstance(obj_type, str):
             return False
         try:
             simple_type = obj_type is list or obj_type is dict
@@ -91,8 +90,8 @@ class UJsonMixin:
         type_value = type(value)
 
         if is_dataclass(type_arg) and type_value is not list:
-            return UJsonMixin._loads(type_arg, value)
+            return UJsonMixin.from_dict(type_arg, value)
         if is_dataclass(type_arg) and type_value is list:
-            return UJsonMixin._loads_many(type_arg, value)
+            return UJsonMixin.from_dict_many(type_arg, value)
         else:
             return value
