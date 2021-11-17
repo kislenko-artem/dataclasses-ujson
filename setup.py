@@ -6,7 +6,7 @@ README = (HERE / "ReadMe.md").read_text()
 
 setup(
     name="dataclasses_ujson",
-    version="0.0.5",
+    version="0.0.6",
     packages=find_packages(exclude=("tests*","bench_marks.py")),
     author="Kislenko Artem ",
     author_email="artem@webart-tech.ru",
