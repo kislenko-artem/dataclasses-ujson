@@ -1,6 +1,6 @@
-from dataclasses import is_dataclass, dataclass
+from dataclasses import is_dataclass
 import sys
-from typing import Any, Generator, List, Union
+from typing import Any, Generator, TypeVar, Union
 
 NEW_TYPING = sys.version_info[:3] >= (3, 7, 0)  # PEP 560
 if NEW_TYPING:
@@ -10,8 +10,8 @@ else:
 
 import ujson as json
 
-DC = dataclass
-DC_GENERATOR = Generator[List[DC], List[DC], None]
+DC = TypeVar('DC')
+DC_GENERATOR = Generator[DC, None, None]
 
 
 class UJsonMixin:
@@ -59,7 +59,7 @@ class UJsonMixin:
         return cls(**_kwargs)
 
     @staticmethod
-    def from_dict_many(cls: DC, data: list) -> DC_GENERATOR:
+    def from_dict_many(cls: DC, data: list) -> Generator[DC, None, None]:
         for d in data:
             yield UJsonMixin.from_dict(cls, d)
 
