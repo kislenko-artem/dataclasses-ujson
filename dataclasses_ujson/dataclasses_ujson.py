@@ -1,6 +1,6 @@
 from dataclasses import is_dataclass
 import sys
-from typing import Any, ClassVar, Generator, TypeVar, Union
+from typing import Any, Generator, TypeVar, Type, Union
 
 NEW_TYPING = sys.version_info[:3] >= (3, 7, 0)  # PEP 560
 if NEW_TYPING:
@@ -11,14 +11,14 @@ else:
 import ujson as json
 
 DC = TypeVar('DC')
-DC_GENERATOR = Generator[ClassVar[DC], None, None]
+DC_GENERATOR = Generator[Type[DC], None, None]
 
 
 class UJsonMixin:
 
     @classmethod
     def loads(cls: DC, json_string: str, many: bool = False,
-              **kwargs) -> Union[ClassVar[DC], DC_GENERATOR]:
+              **kwargs) -> Union[Type[DC], DC_GENERATOR]:
         """
 
         :param json_string: string of json, what should be encoded
@@ -35,7 +35,7 @@ class UJsonMixin:
         raise NotImplemented()
 
     @staticmethod
-    def from_dict(cls: DC, data: dict, _kwargs: dict = None) -> ClassVar[DC]:
+    def from_dict(cls: DC, data: dict, _kwargs: dict = None) -> Type[DC]:
         if _kwargs is None:
             _kwargs = {}
         try:
