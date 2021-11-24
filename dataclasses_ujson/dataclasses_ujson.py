@@ -1,12 +1,6 @@
 from dataclasses import is_dataclass
-import sys
-from typing import Any, Generator, TypeVar, Type, Union
-
-NEW_TYPING = sys.version_info[:3] >= (3, 7, 0)  # PEP 560
-if NEW_TYPING:
-    from typing import _GenericAlias as GenericMeta
-else:
-    from typing import GenericMeta
+from typing import (Any, Generator, TypeVar, Type, Union, _GenericAlias as GenericMeta,
+                    _UnionGenericAlias as UnionGenericAlias)
 
 import ujson as json
 
@@ -41,27 +35,45 @@ class UJsonMixin:
         try:
             for field in getattr(cls, '__dataclass_fields__').values():
                 field_value = data.get(field.name)
-                if field_value is None:
+                if field_value is None and UJsonMixin._is_optional(field.type):
                     _kwargs[field.name] = None
                     continue
-                if (field.type is str or field.type is float or field.type is int
-                        or field.type is bool):
-                    _kwargs[field.name] = field_value
-                elif UJsonMixin._is_collection(field.type):
-                    _kwargs[field.name] = UJsonMixin._decode_collection(field.type,
-                                                                        field_value)
-                elif is_dataclass(field.type):
-                    _kwargs[field.name] = UJsonMixin.from_dict(field.type, field_value)
-                else:
-                    _kwargs[field.name] = field_value
-        except AttributeError:
-            raise TypeError('must be called with a dataclass type or instance')
+                try:
+                    if field.type is str:
+                        _kwargs[field.name] = str(field_value)
+                    elif field.type is float:
+                        _kwargs[field.name] = float(field_value)
+                    elif field.type is int:
+                        _kwargs[field.name] = int(field_value)
+                    elif field.type is bool:
+                        _kwargs[field.name] = bool(field_value)
+                    elif UJsonMixin._is_optional(field.type):
+                        _kwargs[field.name] = UJsonMixin.from_dict(field.type.__args__[0], field_value)
+                    elif UJsonMixin._is_collection(field.type):
+                        _kwargs[field.name] = UJsonMixin._decode_collection(field.type,
+                                                                            field_value)
+                    elif is_dataclass(field.type):
+                        _kwargs[field.name] = UJsonMixin.from_dict(field.type, field_value)
+                    else:
+                        _kwargs[field.name] = field_value
+                except ValueError as e:
+                    raise ValueError('ValueError: {}; field: {}, value: {}, type: {}.'.format(
+                        e, field.name, field_value, field.type))
+        except AttributeError as e:
+            raise TypeError('must be called with a dataclass type or instance: {}'.format(e))
         return cls(**_kwargs)
 
     @staticmethod
     def from_dict_many(cls: DC, data: list) -> DC_GENERATOR:
         for d in data:
             yield UJsonMixin.from_dict(cls, d)
+
+    @staticmethod
+    def _is_optional(obj_type: Any) -> bool:
+        if isinstance(obj_type, UnionGenericAlias) and len(obj_type.__args__) == 2 \
+                and obj_type.__args__[1] == type(None):
+            return True
+        return False
 
     @staticmethod
     def _is_collection(obj_type: Any) -> bool:

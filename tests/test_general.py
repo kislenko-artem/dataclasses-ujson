@@ -1,6 +1,6 @@
 from tests import (JsonList, JsonSimple, JsonDict, JsonNoTypingList,
                    JsonNoTypingDict, JsonNested, JsonUnion, JsonListNested,
-                   JsonSimpleOptional,
+                   JsonSimpleOptional, JsonSimpleNotOptional,
                    JSON_SIMPLE, JSON_LIST, JSON_DICT, JSON_NESTED,
                    JSON_UNION_V1, JSON_UNION_V2, JSON_SIMPLE_LIST,
                    JSON_NESTED_LIST, JSON_SIMPLE_OPTIONAL)
@@ -76,3 +76,12 @@ class TestOptional:
         x1 = JsonSimpleOptional.loads(JSON_SIMPLE_OPTIONAL)
         x2 = JsonSimpleOptional(x=1, y=None)
         assert x1.y == x2.y
+
+    def test_simple_err(self):
+        try:
+            JsonSimpleNotOptional.loads(JSON_SIMPLE_OPTIONAL)
+        except TypeError:
+            pass
+        else:
+            raise Exception("wait for Exception")
+
