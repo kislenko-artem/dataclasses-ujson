@@ -48,7 +48,10 @@ class UJsonMixin:
                     elif field.type is bool:
                         _kwargs[field.name] = bool(field_value)
                     elif UJsonMixin._is_optional(field.type):
-                        _kwargs[field.name] = UJsonMixin.from_dict(field.type.__args__[0], field_value)
+                        if is_dataclass(field.type.__args__[0]):
+                            _kwargs[field.name] = UJsonMixin.from_dict(field.type.__args__[0], field_value)
+                        else:
+                            _kwargs[field.name] = field_value
                     elif UJsonMixin._is_collection(field.type):
                         _kwargs[field.name] = UJsonMixin._decode_collection(field.type,
                                                                             field_value)
