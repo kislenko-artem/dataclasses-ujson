@@ -57,6 +57,10 @@ class UJsonMixin:
                         if generator is None:
                             _kwargs[field.name] = []
                             continue
+                        if isinstance(generator, dict):
+                            _kwargs[field.name] = dict(UJsonMixin._decode_collection(field.type,
+                                                                                     field_value))
+                            continue
                         _kwargs[field.name] = list(UJsonMixin._decode_collection(field.type,
                                                                                  field_value))
                     elif is_dataclass(field.type):
