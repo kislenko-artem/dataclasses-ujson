@@ -111,7 +111,7 @@ class WallItem(UJsonMixin):
     marked_as_ads: int
     post_type: str
     text: str
-    can_pin: bool
+    can_pin: Optional[bool]
     attachments: List[WallAttachment]
 
 

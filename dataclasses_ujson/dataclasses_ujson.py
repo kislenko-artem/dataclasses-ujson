@@ -38,7 +38,7 @@ class UJsonMixin:
                 if field_value is None and UJsonMixin._is_optional(field.type):
                     _kwargs[field.name] = None
                     continue
-                if field_value is None:
+                if field_value is None and not UJsonMixin._is_collection(field.type):
                     raise ValueError('ValueError: field: {}, value: {}, type: {}.'.format(
                         field.name, field_value, field.type))
                 try:

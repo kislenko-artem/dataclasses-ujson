@@ -80,7 +80,7 @@ class TestOptional:
     def test_simple_err(self):
         try:
             JsonSimpleNotOptional.loads(JSON_SIMPLE_OPTIONAL)
-        except TypeError:
+        except ValueError:
             pass
         else:
             raise Exception("wait for Exception")
