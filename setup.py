@@ -6,7 +6,7 @@ README = (HERE / "ReadMe.md").read_text()
 
 setup(
     name="dataclasses_ujson",
-    version="0.0.14",
+    version="0.0.18",
     packages=find_packages(exclude=("tests*","bench_marks.py")),
     author="Kislenko Artem ",
     author_email="artem@webart-tech.ru",
@@ -17,8 +17,9 @@ setup(
     license="Apache",
     install_requires=[
         "ujson>=1.35"
+        "types-ujson>=5.8"
     ],
-    python_requires=">=3.7",
+    python_requires=">=3.10",
     extras_require={
         "dev": ["pytest"]
     },

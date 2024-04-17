@@ -35,6 +35,9 @@ data = JsonClass.loads(json_string)
 print(data.c["x"])
 print(list(data.b)[0].x)
 
+new_dict = data.to_serializable()
+print(new_dict)
+
 ```
 
 All lists will be returned as generators

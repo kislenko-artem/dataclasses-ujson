@@ -1,6 +1,6 @@
 from tests import (JsonList, JsonSimple, JsonDict, JsonNoTypingList,
                    JsonNoTypingDict, JsonNested, JsonUnion, JsonListNested,
-                   JsonSimpleOptional, JsonSimpleNotOptional,
+                   JsonSimpleOptional, JsonSimpleNotOptional, JsonSimpleSkip,
                    JSON_SIMPLE, JSON_LIST, JSON_DICT, JSON_NESTED,
                    JSON_UNION_V1, JSON_UNION_V2, JSON_SIMPLE_LIST,
                    JSON_NESTED_LIST, JSON_SIMPLE_OPTIONAL)
@@ -85,3 +85,22 @@ class TestOptional:
         else:
             raise Exception("wait for Exception")
 
+
+class TestToSerializable:
+    def test_simple(self):
+        d1 = JsonSimple.loads(JSON_SIMPLE)
+        new_dict = d1.to_serializable()
+        assert type(new_dict) == dict
+        assert new_dict == {"x": 1}
+
+    def test_skip(self):
+        d1 = JsonSimpleSkip(x=1, _x=2)
+        new_dict = d1.to_serializable(delete_private=True)
+        assert type(new_dict) == dict
+        assert new_dict == {"x": 1}
+
+    def test_no_skip(self):
+        d1 = JsonSimpleSkip(x=1, _x=2)
+        new_dict = d1.to_serializable()
+        assert type(new_dict) == dict
+        assert new_dict == {"x": 1, "_x": 2}

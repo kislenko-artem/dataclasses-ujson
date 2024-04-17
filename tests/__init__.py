@@ -29,6 +29,12 @@ class JsonList(UJsonMixin):
 class JsonSimple(UJsonMixin):
     x: int
 
+@dataclass(frozen=True)
+class JsonSimpleSkip(UJsonMixin):
+    x: int
+    _x: int
+
+
 
 @dataclass(frozen=True)
 class JsonDict(UJsonMixin):

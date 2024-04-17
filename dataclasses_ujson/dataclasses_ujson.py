@@ -1,5 +1,6 @@
 from dataclasses import is_dataclass
-from typing import (Any, Generator, TypeVar, Type, Union, _GenericAlias as GenericMeta,
+from datetime import datetime
+from typing import (Optional, Any, Generator, TypeVar, Type, Union, _GenericAlias as GenericMeta,
                     _UnionGenericAlias as UnionGenericAlias)
 
 import ujson as json
@@ -25,11 +26,11 @@ class UJsonMixin:
             return UJsonMixin.from_dict_many(cls, data)
         return UJsonMixin.from_dict(cls, data)
 
-    def dumps(self):
-        raise NotImplemented()
+    def to_serializable(self, delete_private: bool = False) -> dict:
+        return to_serializable(self, delete_private)
 
     @staticmethod
-    def from_dict(cls: DC, data: dict, _kwargs: dict = None) -> Type[DC]:
+    def from_dict(cls: DC, data: dict, _kwargs: Optional[dict] = None) -> Type[DC]:
         if _kwargs is None:
             _kwargs = {}
         try:
@@ -121,3 +122,34 @@ class UJsonMixin:
             return UJsonMixin.from_dict_many(type_arg, value)
         else:
             return value
+
+
+def to_serializable(item, delete_private: bool = False) -> dict:
+    data = item.__dict__
+    key_to_delete = []
+    for key in data:
+        if delete_private and str(key).startswith("_"):
+            key_to_delete.append(key)
+            continue
+        if isinstance(data[key], datetime):
+            data[key] = data[key].isoformat()
+        if isinstance(data[key], list):
+            if len(data[key]) == 0:
+                data[key] = []
+            elif hasattr(data[key][0], "__annotations__"):
+                data[key] = many_to_serializable(data[key])
+        if hasattr(data[key], "__annotations__"):
+            data[key] = to_serializable(data[key])
+    if len(key_to_delete) > 0:
+        for key in key_to_delete:
+            del data[key]
+    return data
+
+
+def many_to_serializable(obj: list, delete_private: bool = False) -> list:
+    r_data = []
+    for item in obj:
+        data = to_serializable(item, delete_private)
+        r_data.append(data)
+
+    return r_data
