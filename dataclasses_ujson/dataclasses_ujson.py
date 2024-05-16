@@ -26,8 +26,8 @@ class UJsonMixin:
             return UJsonMixin.from_dict_many(cls, data)
         return UJsonMixin.from_dict(cls, data)
 
-    def to_serializable(self, delete_private: bool = False) -> dict:
-        return to_serializable(self, delete_private)
+    def to_serializable(self, delete_private: bool = False, time_to_str: bool = True) -> dict:
+        return to_serializable(self, delete_private, time_to_str)
 
     @staticmethod
     def from_dict(cls: DC, data: dict, _kwargs: Optional[dict] = None) -> Type[DC]:
@@ -45,6 +45,8 @@ class UJsonMixin:
                 try:
                     if field.type is str:
                         _kwargs[field.name] = str(field_value)
+                    elif field.type is datetime:
+                        _kwargs[field.name] = datetime.fromisoformat(field_value)
                     elif field.type is float:
                         _kwargs[field.name] = float(field_value)
                     elif field.type is int:
@@ -124,14 +126,14 @@ class UJsonMixin:
             return value
 
 
-def to_serializable(item, delete_private: bool = False) -> dict:
+def to_serializable(item, delete_private: bool = False, time_to_str: bool = True) -> dict:
     data = item.__dict__
     key_to_delete = []
     for key in data:
         if delete_private and str(key).startswith("_"):
             key_to_delete.append(key)
             continue
-        if isinstance(data[key], datetime):
+        if time_to_str and isinstance(data[key], datetime):
             data[key] = data[key].isoformat()
         if isinstance(data[key], list):
             if len(data[key]) == 0:
@@ -146,10 +148,10 @@ def to_serializable(item, delete_private: bool = False) -> dict:
     return data
 
 
-def many_to_serializable(obj: list, delete_private: bool = False) -> list:
+def many_to_serializable(obj: list, delete_private: bool = False, time_to_str: bool = True) -> list:
     r_data = []
     for item in obj:
-        data = to_serializable(item, delete_private)
+        data = to_serializable(item, delete_private, time_to_str)
         r_data.append(data)
 
     return r_data
