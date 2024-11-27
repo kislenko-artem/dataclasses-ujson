@@ -1,5 +1,5 @@
 from dataclasses import is_dataclass
-from datetime import datetime
+from datetime import datetime, date
 from typing import (Optional, Any, Generator, TypeVar, Type, Union, _GenericAlias as GenericMeta,
                     _UnionGenericAlias as UnionGenericAlias)
 
@@ -45,8 +45,11 @@ class UJsonMixin:
                 try:
                     if field.type is str:
                         _kwargs[field.name] = str(field_value)
-                    elif field.type is datetime:
-                        _kwargs[field.name] = datetime.fromisoformat(field_value)
+                    elif field.type is datetime or field.type is date:
+                        if isinstance(field_value, str):
+                            _kwargs[field.name] = datetime.fromisoformat(field_value)
+                            continue
+                        _kwargs[field.name] = field_value
                     elif field.type is float:
                         _kwargs[field.name] = float(field_value)
                     elif field.type is int:
@@ -133,7 +136,7 @@ def to_serializable(item, delete_private: bool = False, time_to_str: bool = True
         if delete_private and str(key).startswith("_"):
             key_to_delete.append(key)
             continue
-        if time_to_str and isinstance(data[key], datetime):
+        if time_to_str and isinstance(data[key], datetime) or time_to_str and isinstance(data[key], date):
             data[key] = data[key].isoformat()
         if isinstance(data[key], list):
             if len(data[key]) == 0:

@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Dict, Union, Optional
 
 from dataclasses import dataclass
@@ -28,6 +29,10 @@ class JsonList(UJsonMixin):
 @dataclass(frozen=True)
 class JsonSimple(UJsonMixin):
     x: int
+
+@dataclass(frozen=True)
+class JsonSimpleDateTime(UJsonMixin):
+    dt: datetime
 
 @dataclass(frozen=True)
 class JsonSimpleSkip(UJsonMixin):

@@ -1,6 +1,9 @@
+from datetime import datetime
+
 from tests import (JsonList, JsonSimple, JsonDict, JsonNoTypingList,
                    JsonNoTypingDict, JsonNested, JsonUnion, JsonListNested,
                    JsonSimpleOptional, JsonSimpleNotOptional, JsonSimpleSkip,
+                   JsonSimpleDateTime,
                    JSON_SIMPLE, JSON_LIST, JSON_DICT, JSON_NESTED,
                    JSON_UNION_V1, JSON_UNION_V2, JSON_SIMPLE_LIST,
                    JSON_NESTED_LIST, JSON_SIMPLE_OPTIONAL)
@@ -53,6 +56,16 @@ class TestLoadsDict:
         assert d1.a == d2.a
         assert d1.b == d2.b
         assert d1.c == d2.c
+
+    def test_dict_datetime_srt(self):
+        dt = datetime.now()
+        x1 = JsonSimpleDateTime.from_dict(JsonSimpleDateTime, {"dt": dt.isoformat()})
+        assert x1.dt == dt
+
+    def test_dict_datetime(self):
+        dt = datetime.now()
+        x1 = JsonSimpleDateTime.from_dict(JsonSimpleDateTime, {"dt": dt})
+        assert x1.dt == dt
 
 
 class TestLoadsMany:
