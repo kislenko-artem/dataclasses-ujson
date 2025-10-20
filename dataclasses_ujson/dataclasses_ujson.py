@@ -62,7 +62,7 @@ class UJsonMixin:
                         if not hasattr(field.type, "__args__"):
                             _kwargs[field.name] = field_value
                             continue
-                        if "list" in str(field.type.__args__[0]):
+                        if get_origin(field.type.__args__[0]) is list:
                             if len(field_value) == 0:
                                 _kwargs[field.name] = []
                                 continue
