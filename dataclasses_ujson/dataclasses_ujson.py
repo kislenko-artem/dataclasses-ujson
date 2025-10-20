@@ -1,6 +1,6 @@
 from dataclasses import is_dataclass
 from datetime import datetime, date
-from typing import (Optional, Any, Generator, TypeVar, Type, Union, _GenericAlias as GenericMeta,
+from typing import (get_origin, get_args, Optional, Any, Generator, TypeVar, Type, Union, _GenericAlias as GenericMeta,
                     _UnionGenericAlias as UnionGenericAlias)
 
 import ujson as json
@@ -33,6 +33,8 @@ class UJsonMixin:
     def from_dict(cls: DC, data: dict, _kwargs: Optional[dict] = None) -> Type[DC]:
         if _kwargs is None:
             _kwargs = {}
+        if not hasattr(cls, '__dataclass_fields__'):
+            return data
         try:
             for field in getattr(cls, '__dataclass_fields__').values():
                 field_value = data.get(field.name)
@@ -57,11 +59,26 @@ class UJsonMixin:
                     elif field.type is bool:
                         _kwargs[field.name] = bool(field_value)
                     elif UJsonMixin._is_optional(field.type):
+                        if not hasattr(field.type, "__args__"):
+                            _kwargs[field.name] = field_value
+                            continue
+                        if "list" in str(field.type.__args__[0]):
+                            if len(field_value) == 0:
+                                _kwargs[field.name] = []
+                                continue
+                            _kwargs[field.name] = list(UJsonMixin.from_dict_many(get_args(field.type.__args__[0])[0], field_value))
+                            continue
                         if is_dataclass(field.type.__args__[0]):
                             _kwargs[field.name] = UJsonMixin.from_dict(field.type.__args__[0], field_value)
                             continue
+                        if is_dataclass(get_args(field.type.__args__[0])):
+                            _kwargs[field.name] = UJsonMixin.from_dict(get_args(field.type.__args__[0]), field_value)
+                            continue
                         _kwargs[field.name] = field_value
                     elif UJsonMixin._is_collection(field.type):
+                        if not hasattr(field.type, "__args__"):
+                            _kwargs[field.name] = field_value
+                            continue
                         generator = UJsonMixin._decode_collection(field.type, field_value)
                         if generator is None:
                             _kwargs[field.name] = []
@@ -70,6 +87,10 @@ class UJsonMixin:
                             _kwargs[field.name] = dict(UJsonMixin._decode_collection(field.type,
                                                                                      field_value))
                             continue
+                        if isinstance(generator, list):
+                            _kwargs[field.name] = list(UJsonMixin.from_dict_many(field.type.__args__[0], list(generator)))
+                            continue
+
                         _kwargs[field.name] = list(UJsonMixin._decode_collection(field.type,
                                                                                  field_value))
                     elif is_dataclass(field.type):
@@ -90,6 +111,12 @@ class UJsonMixin:
 
     @staticmethod
     def _is_optional(obj_type: Any) -> bool:
+        if not hasattr(obj_type, "__args__"):
+            return False
+        if "| None" in str(obj_type):
+            return True
+        if "Optional[" in str(obj_type):
+            return True
         if isinstance(obj_type, UnionGenericAlias) and len(obj_type.__args__) == 2 \
                 and obj_type.__args__[1] == type(None):
             return True
@@ -107,6 +134,9 @@ class UJsonMixin:
         if simple_type:
             return True
         else:
+            simple_type = get_origin(obj_type) is list
+            if simple_type:
+                return True
             return type(obj_type) is GenericMeta
 
     @staticmethod
@@ -114,13 +144,14 @@ class UJsonMixin:
         if not value:
             return value
         try:
+            if not hasattr(obj_type, "__args__"):
+                return value
             if obj_type.__args__ is None:
                 return value
             type_arg = obj_type.__args__[0]
         except AttributeError:
             return value
         type_value = type(value)
-
         if is_dataclass(type_arg) and type_value is not list:
             return UJsonMixin.from_dict(type_arg, value)
         if is_dataclass(type_arg) and type_value is list:
@@ -130,7 +161,12 @@ class UJsonMixin:
 
 
 def to_serializable(item, delete_private: bool = False, time_to_str: bool = True) -> dict:
-    data = item.__dict__
+    if hasattr(item, "dict"):
+        data = item.dict
+    elif hasattr(item, "__dict__"):
+        data = item.__dict__
+    else:
+        raise ValueError(f"can't {type(item)} turn into `dict`, you can add method to_serializable to this object")
     key_to_delete = []
     for key in data:
         if delete_private and str(key).startswith("_"):
@@ -142,9 +178,9 @@ def to_serializable(item, delete_private: bool = False, time_to_str: bool = True
             if len(data[key]) == 0:
                 data[key] = []
             elif hasattr(data[key][0], "__annotations__"):
-                data[key] = many_to_serializable(data[key])
+                data[key] = many_to_serializable(data[key], delete_private=delete_private, time_to_str=time_to_str)
         if hasattr(data[key], "__annotations__"):
-            data[key] = to_serializable(data[key])
+            data[key] = to_serializable(data[key], delete_private=delete_private, time_to_str=time_to_str)
     if len(key_to_delete) > 0:
         for key in key_to_delete:
             del data[key]
@@ -154,7 +190,7 @@ def to_serializable(item, delete_private: bool = False, time_to_str: bool = True
 def many_to_serializable(obj: list, delete_private: bool = False, time_to_str: bool = True) -> list:
     r_data = []
     for item in obj:
-        data = to_serializable(item, delete_private, time_to_str)
+        data = to_serializable(item, delete_private=delete_private, time_to_str=time_to_str)
         r_data.append(data)
 
     return r_data

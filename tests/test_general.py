@@ -2,8 +2,8 @@ from datetime import datetime
 
 from tests import (JsonList, JsonSimple, JsonDict, JsonNoTypingList,
                    JsonNoTypingDict, JsonNested, JsonUnion, JsonListNested,
-                   JsonSimpleOptional, JsonSimpleNotOptional, JsonSimpleSkip,
-                   JsonSimpleDateTime,
+                   JsonSimpleOptional, JsonSimpleOptionalV2, JsonSimpleNotOptional, JsonSimpleSkip,
+                   JsonSimpleDateTime, JsonSimplNested,
                    JSON_SIMPLE, JSON_LIST, JSON_DICT, JSON_NESTED,
                    JSON_UNION_V1, JSON_UNION_V2, JSON_SIMPLE_LIST,
                    JSON_NESTED_LIST, JSON_SIMPLE_OPTIONAL)
@@ -67,6 +67,10 @@ class TestLoadsDict:
         x1 = JsonSimpleDateTime.from_dict(JsonSimpleDateTime, {"dt": dt})
         assert x1.dt == dt
 
+    def test_dict_nested(self):
+        x1 = JsonSimplNested.from_dict(JsonSimplNested, {"x": {"x": 1}})
+        assert x1.x.x == 1
+
 
 class TestLoadsMany:
 
@@ -88,6 +92,11 @@ class TestOptional:
     def test_simple(self):
         x1 = JsonSimpleOptional.loads(JSON_SIMPLE_OPTIONAL)
         x2 = JsonSimpleOptional(x=1, y=None)
+        assert x1.y == x2.y
+
+    def test_simplev2(self):
+        x1 = JsonSimpleOptionalV2.loads(JSON_SIMPLE_OPTIONAL)
+        x2 = JsonSimpleOptionalV2(x=1, y=None)
         assert x1.y == x2.y
 
     def test_simple_err(self):
