@@ -5,7 +5,7 @@ HERE = pathlib.Path(__file__).parent
 
 setup(
     name="dataclasses_ujson",
-    version="0.0.30",
+    version="0.0.31",
     packages=find_packages(exclude=("tests*","bench_marks.py")),
     author="Kislenko Artem ",
     author_email="artem@webart-tech.ru",
