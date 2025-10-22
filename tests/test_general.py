@@ -1,10 +1,10 @@
 from datetime import datetime
 
-from tests import (JsonList, JsonSimple, JsonDict, JsonNoTypingList,
-                   JsonNoTypingDict, JsonNested, JsonUnion, JsonListNested,
+from tests import (JsonList, JsonSimple, JsonSimpleEnum, EnumType, EnumStrType, JsonSimpleEnum, JsonSimpleEnumStr,
+                   JsonNoTypingDict, JsonNested, JsonUnion, JsonListNested, JsonDict, JsonNoTypingList,
                    JsonSimpleOptional, JsonSimpleOptionalV2, JsonSimpleNotOptional, JsonSimpleSkip,
                    JsonSimpleDateTime, JsonSimplNested,
-                   JSON_SIMPLE, JSON_LIST, JSON_DICT, JSON_NESTED,
+                   JSON_SIMPLE, JSON_LIST, JSON_DICT, JSON_NESTED, JSON_SIMPLE_STR,
                    JSON_UNION_V1, JSON_UNION_V2, JSON_SIMPLE_LIST,
                    JSON_NESTED_LIST, JSON_SIMPLE_OPTIONAL)
 
@@ -13,6 +13,18 @@ class TestLoadsDict:
     def test_simple(self):
         x1 = JsonSimple.loads(JSON_SIMPLE).x
         x2 = JsonSimple(x=1).x
+        assert x1 == x2
+
+    def test_simple_enum(self):
+        x1 = JsonSimpleEnum.loads(JSON_SIMPLE).x
+        x2 = JsonSimpleEnum(x=EnumType.One).x
+        assert type(x1) == type(x2)
+        assert x1 == x2
+
+    def test_simple_str(self):
+        x1 = JsonSimpleEnumStr.loads(JSON_SIMPLE_STR).x
+        x2 = JsonSimpleEnumStr(x=EnumStrType.One).x
+        assert type(x1) == type(x2)
         assert x1 == x2
 
     def test_nested_list(self):

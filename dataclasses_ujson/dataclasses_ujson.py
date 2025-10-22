@@ -1,5 +1,6 @@
 from dataclasses import is_dataclass
 from datetime import datetime, date
+import enum
 from typing import (get_origin, get_args, Optional, Any, Generator, TypeVar, Type, Union, _GenericAlias as GenericMeta,
                     _UnionGenericAlias as UnionGenericAlias)
 
@@ -52,6 +53,8 @@ class UJsonMixin:
                             _kwargs[field.name] = datetime.fromisoformat(field_value)
                             continue
                         _kwargs[field.name] = field_value
+                    elif type(field.type) is enum.EnumType:
+                        _kwargs[field.name] = field.type(field_value)
                     elif field.type is float:
                         _kwargs[field.name] = float(field_value)
                     elif field.type is int:
@@ -161,9 +164,7 @@ class UJsonMixin:
 
 
 def to_serializable(item, delete_private: bool = False, time_to_str: bool = True) -> dict:
-    if hasattr(item, "dict"):
-        data = item.dict
-    elif hasattr(item, "__dict__"):
+    if hasattr(item, "__dict__"):
         data = item.__dict__
     else:
         raise ValueError(f"can't {type(item)} turn into `dict`, you can add method to_serializable to this object")

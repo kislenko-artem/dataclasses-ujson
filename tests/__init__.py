@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from dataclasses_ujson.dataclasses_ujson import UJsonMixin
 
 JSON_SIMPLE = '{"x": 1}'
+JSON_SIMPLE_STR = '{"x": "one"}'
 JSON_SIMPLE_OPTIONAL = '{"x": 1, "y": null}'
 JSON_LIST = '{"x": [1]}'
 JSON_DICT = '{"x": {"d": 1}}'
@@ -30,6 +31,22 @@ class JsonList(UJsonMixin):
 @dataclass(frozen=True)
 class JsonSimple(UJsonMixin):
     x: int
+
+class EnumType(enum.IntEnum):
+    Two = 2
+    One = 1
+
+@dataclass(frozen=True)
+class JsonSimpleEnum(UJsonMixin):
+    x: EnumType
+
+class EnumStrType(enum.StrEnum):
+    Two = "two"
+    One = "one"
+
+@dataclass(frozen=True)
+class JsonSimpleEnumStr(UJsonMixin):
+    x: EnumStrType
 
 @dataclass(frozen=True)
 class JsonSimpleDateTime(UJsonMixin):
